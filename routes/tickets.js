@@ -9,8 +9,12 @@ const {
     handleGetLZMATicketById
 } = require("../controllers/lzma");
 
+const {testZstd} = require("../controllers/zstd");
+
+
 const router = express.Router();
 
+router.post("/createzstdticket", testZstd);
 router.post("/createTicket", handleCreateTicket);
 router.get("/:id", handleGetTicketById);
 
