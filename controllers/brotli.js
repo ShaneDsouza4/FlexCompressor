@@ -1,12 +1,18 @@
 const TICKET = require("../models/tickets");
 const brotli = require("brotli");
 
-async function handleCreateTicket(req, res){
+async function handleCreateBrotliTicket(req, res){
     try{
-        //const compressedData = brotli.compress(Buffer.from(JSON.stringify(req.body)));
+        const originalData = JSON.stringify(req.body);
+        const originalSize = Buffer.byteLength(originalData);
         const compressedData = Buffer.from(brotli.compress(Buffer.from(JSON.stringify(req.body))));
+        const compressedSize = compressedData.length;
+
         await TICKET.create({
-            data: compressedData
+            data: compressedData,
+            compressor: "Brotli",
+            originalSize: originalSize,
+            compressedSize: compressedSize
         })
         return res.status(201).json({msg:"success"});
     }catch(error){
@@ -15,7 +21,7 @@ async function handleCreateTicket(req, res){
 }
 
 
-async function handleGetTicketById(req, res){
+async function handleGetBrotliTicketById(req, res){
     try{
         const ticket = await TICKET.findById(req.params.id);
         if (ticket) {
@@ -30,6 +36,6 @@ async function handleGetTicketById(req, res){
 }
 
 module.exports = {
-    handleCreateTicket,
-    handleGetTicketById
+    handleCreateBrotliTicket,
+    handleGetBrotliTicketById
 }

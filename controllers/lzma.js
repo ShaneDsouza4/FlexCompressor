@@ -3,15 +3,22 @@ const lzma = require('lzma');
 
 async function handleCreateLZMATicket(req, res){
     try{
+        
         lzma.compress(JSON.stringify(req.body), 1, async (result, error) => {
             if (error) {
               return res.status(500).json({ msg: "error compressing data", error });
             }
+            const originalData = JSON.stringify(req.body);
+            const originalSize = Buffer.byteLength(originalData);
             const compressedData = Buffer.from(result);
+            const compressedSize = compressedData.length;
             await TICKET.create({
-              data: compressedData
+              data: compressedData,
+              compressor: "LZMA",
+              originalSize: originalSize,
+              compressedSize: compressedSize
             });
-            return res.status(201).json({ msg: "success" });
+            return res.status(201).json({ msg: "success"  });
         });
     }catch(error){
         return res.status(500).json({msg:"error creating ticket", error});

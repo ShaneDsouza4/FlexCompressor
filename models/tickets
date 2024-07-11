@@ -23,6 +23,18 @@ const ticketSchema = new mongoose.Schema({
       type: Buffer,
       required: true
     },
+    compressor:{
+        type:String,
+        required: true
+    },
+    originalSize:{
+        type: Number,
+        required: true
+    },
+    compressedSize:{
+        type: Number,
+        required: true
+    },
     createdAt: {
       type: Date,
       default: Date.now
