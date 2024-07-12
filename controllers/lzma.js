@@ -12,11 +12,13 @@ async function handleCreateLZMATicket(req, res){
             const originalSize = Buffer.byteLength(originalData);
             const compressedData = Buffer.from(result);
             const compressedSize = compressedData.length;
+            const compressionRatio = originalSize / compressedSize;
             await TICKET.create({
               data: compressedData,
               compressor: "LZMA",
               originalSize: originalSize,
-              compressedSize: compressedSize
+              compressedSize: compressedSize,
+              compressionRatio: compressionRatio
             });
             return res.status(201).json({ msg: "success"  });
         });

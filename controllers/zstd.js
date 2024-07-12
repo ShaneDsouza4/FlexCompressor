@@ -8,12 +8,14 @@ async function handleCreateZSTDTicket(req, res) {
       const originalSize = Buffer.byteLength(originalData);
       const compressedData = await zstd.compress(Buffer.from(originalData));
       const compressedSize = compressedData.length;
-  
+      const compressionRatio = originalSize / compressedSize;
+
       await TICKET.create({
         data: compressedData,
         compressor: "ZSTD",
         originalSize: originalSize,
-        compressedSize: compressedSize
+        compressedSize: compressedSize,
+        compressionRatio:compressionRatio
       });
   
       return res.status(201).json({ msg: "success" });
