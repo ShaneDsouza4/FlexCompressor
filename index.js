@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const { connectToMongoDB } = require("./connection");
 const TICKET = require("./models/tickets");
@@ -9,7 +10,8 @@ const app = express();
 app.use(express.json()); 
 
 
-connectToMongoDB("mongodb://127.0.0.1:27017/flexCompressor")
+//connectToMongoDB("mongodb://127.0.0.1:27017/flexCompressor")
+connectToMongoDB(process.env.MONGO_URL)
 .then(()=>console.log("MongoDB connected."));
 
 app.get("/", (req, res)=>{

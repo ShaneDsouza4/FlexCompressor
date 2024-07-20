@@ -47,7 +47,17 @@ async function handleGetBrotliTicketById(req, res){
     }
 }
 
+// POST route to add multiple documents
+async function handleCreateBulkBrotliTicket(req, res) {
+    try {
+     
+    } catch (error) {
+    }
+  }
+
+
 module.exports = {
     handleCreateBrotliTicket,
-    handleGetBrotliTicketById
+    handleGetBrotliTicketById,
+    handleCreateBulkBrotliTicket
 }
