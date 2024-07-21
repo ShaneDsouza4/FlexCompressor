@@ -7,16 +7,12 @@ const analyticsRoute = require("./routes/analytics.js");
 
 const path = require("path");
 const PORT = 8000;
-const cron = require("node-cron");
+const {runCron} = require("./controllers/cron.js");
 
 const app = express();
 app.use(express.json()); 
 
-// cron to run task
-cron.schedule('* * * * *', () => {
-    // console.log('running a task every minute');
-  });
-
+runCron();
 //connectToMongoDB("mongodb://127.0.0.1:27017/flexCompressor")
 connectToMongoDB(process.env.MONGO_URL)
 .then(()=>console.log("MongoDB connected."));

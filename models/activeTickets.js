@@ -16,10 +16,6 @@ const ticketSchema = new mongoose.Schema({
     content:{
         type: String
     },
-    accessCount: {
-        type: Number,
-        default: 0
-    }
 }, {timestamps: true})
 
 //Model

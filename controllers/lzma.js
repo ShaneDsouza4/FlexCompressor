@@ -9,6 +9,7 @@ async function handleCreateLZMATicket(req, res) {
         return res.status(500).json({ msg: "error compressing data", error });
       }
       const originalData = JSON.stringify(req.body);
+      const {ticketID} = req.body;
       const originalSize = Buffer.byteLength(originalData);
       const compressedData = Buffer.from(result);
       const endCompress = process.hrtime(startCompress);
@@ -19,6 +20,7 @@ async function handleCreateLZMATicket(req, res) {
       
 
       await ArchiveTickets.create({
+        ticketID,
         data: compressedData,
         compressor: "LZMA",
         originalSize: originalSize,
@@ -33,26 +35,36 @@ async function handleCreateLZMATicket(req, res) {
   }
 }
 
+async function lzmaDecompression(ticket) {
+  return new Promise((resolve, reject) => {
+    const startDecompress = process.hrtime(); // Record start time
+    lzma.decompress(ticket.data, async (result, error) => {
+        if (error) {
+            return reject(null);
+        }
+        const endDecompress = process.hrtime(startDecompress);
+        const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+
+        const decompressedData = JSON.parse(result.toString());
+        resolve([decompressedData, decompressionTime]);
+    });
+});
+}
+
 async function handleGetLZMATicketById(req, res) {
   try {
     const ticket = await ArchiveTickets.findById(req.params.id);
     if (ticket) {
-      const startDecompress = process.hrtime();
-      lzma.decompress(ticket.data, async (result, error) => {
-        if (error) {
-          return res
-            .status(500)
-            .json({ msg: "error decompressing data", error });
-        }
-        const endDecompress = process.hrtime(startDecompress);
-        decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
-        await ArchiveTickets.findByIdAndUpdate(
-          {_id: ticket._id},
-          { decompressionTime }
-        )
-        const decompressedData = JSON.parse(result.toString());
-        res.status(200).json(decompressedData);
-      });
+      const decompressionResult = await lzmaDecompression(ticket);
+      if (!decompressionResult) {
+        return res.status(500).json({ msg: "error decompressing data", error });
+      }
+      const [decompressedData, decompressionTime] = decompressionResult;
+      await ArchiveTickets.findByIdAndUpdate(
+        { _id: ticket._id },
+        { decompressionTime }
+    );
+    res.status(200).json(decompressedData);
     } else {
       res.status(404).json({ msg: "Ticket not found" });
     }
@@ -64,4 +76,5 @@ async function handleGetLZMATicketById(req, res) {
 module.exports = {
   handleCreateLZMATicket,
   handleGetLZMATicketById,
+  lzmaDecompression
 };

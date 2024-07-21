@@ -7,6 +7,7 @@ async function handleCreateZSTDTicket(req, res) {
       const originalData = JSON.stringify(req.body);
       const originalSize = Buffer.byteLength(originalData);
       const startCompress = process.hrtime();
+      const {ticketID} = req.body;
       const compressedData = await zstd.compress(Buffer.from(originalData));
       const endCompress = process.hrtime(startCompress);
       const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
@@ -14,6 +15,7 @@ async function handleCreateZSTDTicket(req, res) {
       const compressionRatio = originalSize / compressedSize;
 
       await ArchiveTickets.create({
+        ticketID,
         data: compressedData,
         compressor: "ZSTD",
         originalSize: originalSize,
@@ -28,24 +30,30 @@ async function handleCreateZSTDTicket(req, res) {
     }
   }
 
+async function zstdDecompression(ticket) {
+  const startDecompress = process.hrtime();
+  const decompressedData = await zstd.decompress(ticket.data);
+  const endDecompress = process.hrtime(startDecompress);
+  const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+  console.log(decompressedData);
+  return [JSON.parse(decompressedData.toString()), decompressionTime];
+}
 
 async function handleGetZSTDTicketById(req, res) {
     try {
       const ticket = await ArchiveTickets.findById(req.params.id);
       if (ticket) {
-        const startDecompress = process.hrtime();
-        const decompressedData = await zstd.decompress(ticket.data);
-        const endDecompress = process.hrtime(startDecompress);
-        decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+        const [decompressedData, decompressionTime] = await zstdDecompression(ticket);
         await ArchiveTickets.findByIdAndUpdate(
           {_id: ticket._id},
           { decompressionTime }
         )
-        res.status(200).json(JSON.parse(decompressedData.toString()));
+        res.status(200).json(decompressedData);
       } else {
         res.status(404).json({ msg: 'Ticket not found' });
       }
     } catch (error) {
+      console.log(error);
       res.status(500).json({ msg: 'Error retrieving ticket', error });
     }
 };
@@ -53,5 +61,6 @@ async function handleGetZSTDTicketById(req, res) {
 
 module.exports = {
     handleCreateZSTDTicket,
-    handleGetZSTDTicketById
+    handleGetZSTDTicketById,
+    zstdDecompression
 }
