@@ -87,7 +87,37 @@ async function handleGetBothCollectionCount(req, res){
     }
 }
 
+async function getCompressionStats(req, res){
+    const aggregation = await archiveTickets.aggregate([
+        {
+            $group: {
+                _id: null,
+                totalOriginalSize: { $sum: "$originalSize" },
+                totalCompressedSize: { $sum: "$compressedSize" }
+            }
+        }
+    ]);
+
+    if (aggregation.length > 0) {
+        const { totalOriginalSize, totalCompressedSize } = aggregation[0];
+        const percentageSaved = ((totalOriginalSize - totalCompressedSize) / totalOriginalSize) * 100;
+
+        res.status(200).json({
+            totalOriginalSize,
+            totalCompressedSize,
+            percentageSaved: Math.round(percentageSaved * 100) / 100 // Round to 2 decimal places
+        });
+    } else {
+        res.status(200).json({
+            totalOriginalSize: 0,
+            totalCompressedSize: 0,
+            percentageSaved: 0
+        });
+    }
+}
+
 module.exports = {
     handleGetAlgoCountTimeRatio,
-    handleGetBothCollectionCount
+    handleGetBothCollectionCount,
+    getCompressionStats
 }
