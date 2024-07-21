@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const ticketSchema = new mongoose.Schema({
+    ticketID: {
+        type: String
+    },
     data: {
       type: Buffer,
       required: true
@@ -26,6 +29,10 @@ const ticketSchema = new mongoose.Schema({
     },
     decompressionTime: {
         type: Number, // in milliseconds
+    },
+    accessCount: {
+        type: Number,
+        default: 0
     },
     createdAt: {
       type: Date,

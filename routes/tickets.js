@@ -4,8 +4,13 @@ const express = require("express");
 const { 
     handleCreateTicket,
     handleGetAllTickets,
-    handleGetTicketByID
+    handleGetTicketByID,
 } = require("../controllers/tickets");
+
+const {
+    getArchivedTicketByTicketId,
+    getArchivedTicketById
+} = require("../controllers/archivedtickets");
 
 
 //Brotli Controller
@@ -34,6 +39,10 @@ router.post("/createTicket",handleCreateTicket);
 router.get("/getTicket/:id", handleGetTicketByID);
 router.get("/getAllTickets", handleGetAllTickets);
 
+//General archive Tickets Routes
+router.get("/getArchivedTicket/ticketid/:id", getArchivedTicketByTicketId);
+router.get("/getArchivedTicket/:id", getArchivedTicketById);
+
 
 //Brotli Routes
 router.post("/createBrotliTicket", handleCreateBrotliTicket);
@@ -47,5 +56,6 @@ router.get("/getLZMA/:id", handleGetLZMATicketById);
 //ZTD Routes
 router.post("/createZSTDTicket", handleCreateZSTDTicket);
 router.get("/getZSTD/:id", handleGetZSTDTicketById);
+// router.post("/createactive", )
 
 module.exports = router;
