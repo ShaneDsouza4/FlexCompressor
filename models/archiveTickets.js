@@ -43,7 +43,7 @@ ticketSchema.pre('save', function(next) {
 });
 
 //Model
-const TICKET = mongoose.model('ticket', ticketSchema);
+const ArchiveTickets = mongoose.model('ArchiveTickets', ticketSchema);
 
 //Exports
-module.exports = TICKET;
+module.exports = ArchiveTickets;

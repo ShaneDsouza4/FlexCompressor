@@ -1,8 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const { connectToMongoDB } = require("./connection");
-const TICKET = require("./models/tickets");
+const TICKET = require("./models/archiveTickets.js");
 const ticketRoute = require("./routes/tickets");
+const analyticsRoute = require("./routes/analytics.js");
+
 const path = require("path");
 const PORT = 8000;
 
@@ -19,6 +21,7 @@ app.get("/", (req, res)=>{
 })
 
 app.use("/api/ticket",ticketRoute);
+app.use("/api/analytics", analyticsRoute);
 
 app.listen(PORT, ()=>console.log(`Server running on PORT: ${PORT}`));
 

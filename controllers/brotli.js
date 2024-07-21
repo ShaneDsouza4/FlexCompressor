@@ -1,4 +1,4 @@
-const TICKET = require("../models/tickets");
+const ArchiveTickets = require("../models/archiveTickets.js");
 const brotli = require("brotli");
 
 async function handleCreateBrotliTicket(req, res){
@@ -11,7 +11,7 @@ async function handleCreateBrotliTicket(req, res){
         const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
         const compressedSize = compressedData.length;
         const compressionRatio = originalSize / compressedSize;
-        await TICKET.create({
+        await ArchiveTickets.create({
             data: compressedData,
             compressor: "Brotli",
             originalSize: originalSize,
@@ -28,13 +28,13 @@ async function handleCreateBrotliTicket(req, res){
 
 async function handleGetBrotliTicketById(req, res){
     try{
-        const ticket = await TICKET.findById(req.params.id);
+        const ticket = await ArchiveTickets.findById(req.params.id);
         if (ticket) {
             const startDecompress = process.hrtime();
             const decompressedData = JSON.parse(Buffer.from(brotli.decompress(ticket.data)).toString());
             const endDecompress = process.hrtime(startDecompress);
             decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
-            await TICKET.findByIdAndUpdate(
+            await ArchiveTickets.findByIdAndUpdate(
               {_id: ticket._id},
               { decompressionTime }
             )

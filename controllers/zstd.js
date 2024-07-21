@@ -1,4 +1,4 @@
-const TICKET = require("../models/tickets");
+const ArchiveTickets = require("../models/archiveTickets.js");
 const zstd = require('@mongodb-js/zstd');
 const {compress, decompress} = require("@mongodb-js/zstd");
 
@@ -13,7 +13,7 @@ async function handleCreateZSTDTicket(req, res) {
       const compressedSize = compressedData.length;
       const compressionRatio = originalSize / compressedSize;
 
-      await TICKET.create({
+      await ArchiveTickets.create({
         data: compressedData,
         compressor: "ZSTD",
         originalSize: originalSize,
@@ -31,13 +31,13 @@ async function handleCreateZSTDTicket(req, res) {
 
 async function handleGetZSTDTicketById(req, res) {
     try {
-      const ticket = await TICKET.findById(req.params.id);
+      const ticket = await ArchiveTickets.findById(req.params.id);
       if (ticket) {
         const startDecompress = process.hrtime();
         const decompressedData = await zstd.decompress(ticket.data);
         const endDecompress = process.hrtime(startDecompress);
         decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
-        await TICKET.findByIdAndUpdate(
+        await ArchiveTickets.findByIdAndUpdate(
           {_id: ticket._id},
           { decompressionTime }
         )

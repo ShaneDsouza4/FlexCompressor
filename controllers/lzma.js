@@ -1,4 +1,4 @@
-const TICKET = require("../models/tickets");
+const ArchiveTickets = require("../models/archiveTickets.js");
 const lzma = require("lzma");
 
 async function handleCreateLZMATicket(req, res) {
@@ -18,7 +18,7 @@ async function handleCreateLZMATicket(req, res) {
       const compressionRatio = originalSize / compressedSize;
       
 
-      await TICKET.create({
+      await ArchiveTickets.create({
         data: compressedData,
         compressor: "LZMA",
         originalSize: originalSize,
@@ -35,7 +35,7 @@ async function handleCreateLZMATicket(req, res) {
 
 async function handleGetLZMATicketById(req, res) {
   try {
-    const ticket = await TICKET.findById(req.params.id);
+    const ticket = await ArchiveTickets.findById(req.params.id);
     if (ticket) {
       const startDecompress = process.hrtime();
       lzma.decompress(ticket.data, async (result, error) => {
@@ -46,7 +46,7 @@ async function handleGetLZMATicketById(req, res) {
         }
         const endDecompress = process.hrtime(startDecompress);
         decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
-        await TICKET.findByIdAndUpdate(
+        await ArchiveTickets.findByIdAndUpdate(
           {_id: ticket._id},
           { decompressionTime }
         )
