@@ -1,6 +1,7 @@
-const archiveTickets = require("../models/archiveTickets.js");
+const activeTickets = require("../models/ActiveTickets");
+const archiveTickets = require("../models/archiveTickets");
 
-async function handleGetAlgoCounts(req, res){
+async function handleGetAlgoCountTimeRatio(req, res){
     try{
         const allTicketCount = await archiveTickets.countDocuments({});
 
@@ -76,6 +77,17 @@ async function handleGetAlgoCounts(req, res){
     }
 }
 
+async function handleGetBothCollectionCount(req, res){
+    try{
+        const totalTicket = await activeTickets.countDocuments({});
+        const totalArchiveTickets = await archiveTickets.countDocuments({});
+        return res.status(200).json({totalTicket, totalArchiveTickets});
+    }catch(error){
+        res.status(500).json({ msg: 'Error getting compression counts', error });
+    }
+}
+
 module.exports = {
-    handleGetAlgoCounts
+    handleGetAlgoCountTimeRatio,
+    handleGetBothCollectionCount
 }
