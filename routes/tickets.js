@@ -5,7 +5,8 @@ const {
     handleCreateTicket,
     handleGetAllTickets,
     handleGetTicketByID,
-    handleGetAllArchivedTickets
+    handleGetAllArchivedTickets,
+    archiveTickets
 } = require("../controllers/tickets");
 
 const {
@@ -39,6 +40,7 @@ const router = express.Router();
 router.post("/createTicket",handleCreateTicket);
 router.get("/getTicket/:id", handleGetTicketByID);
 router.get("/getAllTickets", handleGetAllTickets);
+router.post("/archiveTickets", archiveTickets);
 
 //General archive Tickets Routes
 router.get("/getArchivedTicket/ticketid/:id", getArchivedTicketByTicketId);

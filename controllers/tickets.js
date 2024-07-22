@@ -1,8 +1,12 @@
+const mongoose = require('mongoose');
 const ActiveTickets = require("../models/ActiveTickets");
 const ArchiveTickets = require("../models/archiveTickets");
 const brotli = require("brotli");
 const lzma = require("lzma");
 const zstd = require('@mongodb-js/zstd');
+
+
+const { ObjectId } = mongoose.Types;
 
 async function handleCreateTicket(req, res){
     try{
@@ -20,6 +24,53 @@ async function handleCreateTicket(req, res){
     }catch(error){
         return res.status(500).json({ msg: "Error Creating Ticket", error });
     }
+}
+
+async function archiveTickets(req, res) {
+  try {
+    const { tickets } = req.body;
+    tickets.forEach((element) => {
+      console.log(element);
+    });
+
+    const objectIdArray = tickets.map((id) => new ObjectId(id));
+
+    const documents = await ActiveTickets.find({
+      _id: { $in: objectIdArray },
+    });
+
+    if(documents.length == 0)
+    return res.status(200).json({ data: "No documents with specified identifiers present" });
+
+
+    documents.map(async ({_id, ticketID, state, priority, assigned_to, content}) => {
+      const originalData = JSON.stringify({ticketID, state, priority, assigned_to, content});
+      const originalSize = Buffer.byteLength(originalData);
+      const startCompress = process.hrtime();
+      const compressedData = await zstd.compress(Buffer.from(originalData));
+      const endCompress = process.hrtime(startCompress);
+      const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
+      const compressedSize = compressedData.length;
+      const compressionRatio = originalSize / compressedSize;
+
+      await ArchiveTickets.create({
+        ticketID,
+        data: compressedData,
+        compressor: "ZSTD",
+        originalSize: originalSize,
+        compressedSize: compressedSize,
+        compressionRatio: compressionRatio,
+        compressionTime: compressionTime,
+      });
+
+      await ActiveTickets.findByIdAndDelete(_id);
+    });
+
+    return res.status(201).json({ msg: "Successfully moved documents" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Error Archiving Tickets", error });
+  }
 }
 
 async function handleGetTicketByID(req, res){
@@ -226,5 +277,6 @@ module.exports = {
     handleGetAllCompressedBrotliTickets,
     handleGetAllCompressedLZMATickets,
     handleGetAllCompressedZSTDTickets,
-    handleGetAllArchivedTickets
+    handleGetAllArchivedTickets,
+    archiveTickets
 }
