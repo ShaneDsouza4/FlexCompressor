@@ -12,7 +12,7 @@ const {runCron} = require("./controllers/cron.js");
 const app = express();
 app.use(express.json()); 
 
-runCron();
+//runCron();
 //connectToMongoDB("mongodb://127.0.0.1:27017/flexCompressor")
 connectToMongoDB(process.env.MONGO_URL)
 .then(()=>console.log("MongoDB connected."));
