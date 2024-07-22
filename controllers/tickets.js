@@ -26,6 +26,48 @@ async function handleCreateTicket(req, res){
     }
 }
 
+// archive tickets older than a month
+async function archiveOldTickets() {
+    try {
+
+      // Calculate the date one month ago
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      
+      const documents = await ActiveTickets.find({ createdAt: { $lt: oneMonthAgo } });
+      if(documents.length == 0)
+      return;
+
+
+
+    documents.map(async ({_id, ticketID, state, priority, assigned_to, content}) => {
+      const originalData = JSON.stringify({ticketID, state, priority, assigned_to, content});
+      const originalSize = Buffer.byteLength(originalData);
+      const startCompress = process.hrtime();
+      const compressedData = await zstd.compress(Buffer.from(originalData));
+      const endCompress = process.hrtime(startCompress);
+      const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
+      const compressedSize = compressedData.length;
+      const compressionRatio = originalSize / compressedSize;
+
+      await ArchiveTickets.create({
+        ticketID,
+        data: compressedData,
+        compressor: "ZSTD",
+        originalSize: originalSize,
+        compressedSize: compressedSize,
+        compressionRatio: compressionRatio,
+        compressionTime: compressionTime,
+      });
+
+      await ActiveTickets.findByIdAndDelete(_id);
+
+    });
+    } catch (error) {
+        console.log("Error Archiving Old Documents");
+    }
+}
+
 async function archiveTickets(req, res) {
   try {
     const { tickets } = req.body;
@@ -278,5 +320,6 @@ module.exports = {
     handleGetAllCompressedLZMATickets,
     handleGetAllCompressedZSTDTickets,
     handleGetAllArchivedTickets,
-    archiveTickets
+    archiveTickets,
+    archiveOldTickets
 }
