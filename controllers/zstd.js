@@ -35,8 +35,13 @@ async function zstdDecompression(ticket) {
   const decompressedData = await zstd.decompress(ticket.data);
   const endDecompress = process.hrtime(startDecompress);
   const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
-  console.log(decompressedData);
   return [JSON.parse(decompressedData.toString()), decompressionTime];
+}
+
+async function zstdCompress(data) {
+  const originalData = JSON.stringify(data);
+  const compressedData = await zstd.compress(Buffer.from(originalData));
+  return compressedData;
 }
 
 async function handleGetZSTDTicketById(req, res) {
@@ -62,5 +67,6 @@ async function handleGetZSTDTicketById(req, res) {
 module.exports = {
     handleCreateZSTDTicket,
     handleGetZSTDTicketById,
-    zstdDecompression
+    zstdDecompression,
+    zstdCompress
 }

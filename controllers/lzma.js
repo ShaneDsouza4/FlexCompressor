@@ -35,6 +35,18 @@ async function handleCreateLZMATicket(req, res) {
   }
 }
 
+async function lzmaCompress(data) {
+  return new Promise((resolve, reject) => {
+    lzma.compress(JSON.stringify(data), 1, (result, error) => {
+      if (error) {
+        return reject(null);
+      }
+      const compressedData = Buffer.from(result);
+      resolve(compressedData);
+    });
+  });
+}
+
 async function lzmaDecompression(ticket) {
   return new Promise((resolve, reject) => {
     const startDecompress = process.hrtime(); // Record start time
@@ -76,5 +88,6 @@ async function handleGetLZMATicketById(req, res) {
 module.exports = {
   handleCreateLZMATicket,
   handleGetLZMATicketById,
-  lzmaDecompression
+  lzmaDecompression,
+  lzmaCompress
 };

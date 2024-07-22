@@ -27,6 +27,11 @@ async function handleCreateBrotliTicket(req, res){
     }
 }
 
+function brotliCompress(data) {
+    const compressedData = Buffer.from(brotli.compress(Buffer.from(JSON.stringify(data))));
+    return compressedData;
+}
+
 function brotliDecompression(ticket) {
   const startDecompress = process.hrtime();
   const decompressedData = JSON.parse(
@@ -34,7 +39,6 @@ function brotliDecompression(ticket) {
   );
   const endDecompress = process.hrtime(startDecompress);
   let decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
-  console.log(decompressedData);
   return [decompressedData, decompressionTime];
 }
 
@@ -70,5 +74,6 @@ module.exports = {
     handleCreateBrotliTicket,
     handleGetBrotliTicketById,
     handleCreateBulkBrotliTicket,
-    brotliDecompression
+    brotliDecompression,
+    brotliCompress
 }
