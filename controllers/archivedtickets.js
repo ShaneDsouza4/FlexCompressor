@@ -1,8 +1,10 @@
+const { differenceInWeeks, format } = require('date-fns');
+
 const ArchiveTickets = require("../models/archiveTickets.js");
-const lzma = require("lzma");
-const {brotliDecompression} = require("./brotli.js")
-const {lzmaDecompression} = require("./lzma.js")
-const {zstdDecompression} = require("./zstd.js")
+const {brotliDecompression, brotliCompress} = require("./brotli.js")
+const {lzmaDecompression, lzmaCompress} = require("./lzma.js")
+const {zstdDecompression, zstdCompress} = require("./zstd.js")
+
 
 async function decompressData(ticket) {
     switch (ticket.compressor) {
@@ -66,7 +68,74 @@ async function getArchivedTicketById(req, res) {
     }
 }
 
+// to calculate number of accesses per week
+function calculateAccessesPerWeek(createdDate, totalAccesses = 0) {
+    const createdDateParsed = new Date(createdDate);
+    const now = new Date();
+    const weeksSinceCreation = differenceInWeeks(now, createdDateParsed);
+
+
+    if (weeksSinceCreation < 1) {
+        return totalAccesses; // or return 0 based on your requirements
+    }
+
+    const accessesPerWeek = totalAccesses / weeksSinceCreation;
+    return accessesPerWeek;
+}
+
+async function recompressArchived() {
+    try{
+        const tickets = await ArchiveTickets.find({});
+        if(!tickets || !tickets.length){
+            return res.status(404).json({ msg: "No tickets found" });
+        }
+
+        await Promise.all(tickets.map(async (ticket) => {
+            const accessPerWeek = calculateAccessesPerWeek(ticket.createdAt, ticket.accessCount);
+            let recompress = false;
+
+            // high CR low Speed - LZMA
+            if(accessPerWeek < 2) {
+                if(ticket.compressor !== 'LZMA') {
+                    const [decompressedData, ] = await decompressData(ticket);
+                    ticket.data = await lzmaCompress(decompressedData);
+                    ticket.compressor = 'LZMA';
+                    recompress = true;
+
+                }
+            }
+
+            // Medium - Brotli
+            else if(accessPerWeek < 10) {
+                if(ticket.compressor !== 'Brotli') {
+                    const [decompressedData, ] = await decompressData(ticket);
+                    ticket.data = await brotliCompress(decompressedData);
+                    ticket.compressor = 'Brotli';
+                    recompress = true;
+                }
+            }
+
+            // low CR High speed - ZSTD
+            else if(ticket.compressor !== 'ZSTD') {
+                const [decompressedData, ] = await decompressData(ticket);
+                ticket.data = await zstdCompress(decompressedData);
+                ticket.compressor = 'ZSTD';
+                recompress = true;
+
+            }
+
+            if(recompress){
+            await ticket.save();}
+        }));
+
+    }catch(error){
+        console.log("recompress Error");
+        console.log(error);
+    }
+}
+
 module.exports = {
     getArchivedTicketByTicketId,
-    getArchivedTicketById
+    getArchivedTicketById,
+    recompressArchived
   };
