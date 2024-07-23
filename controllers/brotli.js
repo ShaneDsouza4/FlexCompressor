@@ -12,6 +12,13 @@ async function handleCreateBrotliTicket(req, res){
         const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
         const compressedSize = compressedData.length;
         const compressionRatio = originalSize / compressedSize;
+
+        // Decompress the data to measure decompression time
+        const startDecompress = process.hrtime();
+        const decompressedData = brotli.decompress(compressedData);
+        const endDecompress = process.hrtime(startDecompress);
+        const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+
         await ArchiveTickets.create({
             ticketID,
             data: compressedData,
@@ -19,7 +26,8 @@ async function handleCreateBrotliTicket(req, res){
             originalSize: originalSize,
             compressedSize: compressedSize,
             compressionRatio: compressionRatio,
-            compressionTime: compressionTime
+            compressionTime: compressionTime,
+            decompressionTime: decompressionTime
         })
         return res.status(201).json({msg:"success"});
     }catch(error){

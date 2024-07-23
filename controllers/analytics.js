@@ -42,37 +42,81 @@ async function handleGetAlgoCountTimeRatio(req, res){
         ]);
 
         const round = (value) => Math.round(value * 1000) / 1000;
+
+        const algorithmsData = [
+            {
+                name: "ZSTD",
+                totalTickets:allTicketCount,
+                tasksCompleted: zstdAggregation[0].count,
+                avgCompressionTime: zstdAggregation[0].avgCompressionTime,
+                avgCompressionRatio: zstdAggregation[0].avgCompressionRatio
+            },
+            {
+                name: "LZMA",
+                totalTickets:allTicketCount,
+                tasksCompleted: lzmaAggregation[0].count,
+                avgCompressionTime: lzmaAggregation[0].avgCompressionTime,
+                avgCompressionRatio: lzmaAggregation[0].avgCompressionRatio
+            },
+            {
+                name: "Brotli",
+                totalTickets:allTicketCount,
+                tasksCompleted: brotliAggregation[0].count,
+                avgCompressionTime: brotliAggregation[0].avgCompressionTime,
+                avgCompressionRatio: brotliAggregation[0].avgCompressionRatio
+            }
+        ]
+
+        console.log(algorithmsData);
+
+        // Sort algorithms primarily by avgCompressionTime (ascending) and secondarily by avgCompressionRatio (descending)
+        algorithmsData.sort((a, b) => {
+            if (a.avgCompressionTime === b.avgCompressionTime) {
+                return b.avgCompressionRatio - a.avgCompressionRatio;
+            }
+            return a.avgCompressionTime - b.avgCompressionTime;
+        });
+
+        algorithmsData[0].rating = 'Best';
+        algorithmsData[1].rating = 'Average';
+        algorithmsData[2].rating = 'Worst';
         
-        res.status(200).json([
+        /* res.status(200).json([
             {
                 id: 1,
                 name: "ZSTD",
-                position: "Best Compression",
+                position: algorithmsData[0].rating,
                 totalTickets:allTicketCount,
-                tasksCompleted: zstdAggregation[0].count,
-                avgCompressionTime: round(zstdAggregation[0].avgCompressionTime),
-                avgCompressionRatio: round(zstdAggregation[0].avgCompressionRatio)
+                tasksCompleted: algorithmsData[0].tasksCompleted,
+                avgCompressionTime: round(algorithmsData[0].avgCompressionTime),
+                avgCompressionRatio: round(algorithmsData[0].avgCompressionRatio)
             },
             {
                 id: 2,
                 name: "LZMA",
-                position: "Average Compression",
+                position: algorithmsData[1].rating,
                 totalTickets:allTicketCount,
-                tasksCompleted: lzmaAggregation[0].count,
-                avgCompressionTime: round(lzmaAggregation[0].avgCompressionTime),
-                avgCompressionRatio: round(lzmaAggregation[0].avgCompressionRatio)
+                tasksCompleted: algorithmsData[1].tasksCompleted,
+                avgCompressionTime: round(algorithmsData[1].avgCompressionTime),
+                avgCompressionRatio: round(algorithmsData[1].avgCompressionRatio)
             },
             {
                 id: 3,
                 name: "Brotli",
-                position: "Worst Compression",
+                position: algorithmsData[2].rating,
                 totalTickets:allTicketCount,
-                tasksCompleted: brotliAggregation[0].count,
-                avgCompressionTime: round(brotliAggregation[0].avgCompressionTime),
-                avgCompressionRatio: round(brotliAggregation[0].avgCompressionRatio)
+                tasksCompleted: algorithmsData[2].tasksCompleted,
+                avgCompressionTime: round(algorithmsData[2].avgCompressionTime),
+                avgCompressionRatio: round(algorithmsData[2].avgCompressionRatio)
             }
-        ]);
+        ]); */
+        res.status(200).json({
+            LZMA: algorithmsData.find(algo => algo.name === 'LZMA'),
+            Zstandard: algorithmsData.find(algo => algo.name === 'ZSTD'),
+            Brotli: algorithmsData.find(algo => algo.name === 'Brotli')
+        });
     }catch(error){
+        console.log(error);
         res.status(500).json({ msg: 'Error getting compression counts', error });
     }
 }

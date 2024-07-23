@@ -14,6 +14,12 @@ async function handleCreateZSTDTicket(req, res) {
       const compressedSize = compressedData.length;
       const compressionRatio = originalSize / compressedSize;
 
+      // Decompress the data to measure decompression time
+      const startDecompress = process.hrtime();
+      const decompressedData = zstd.decompress(compressedData);
+      const endDecompress = process.hrtime(startDecompress);
+      const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+
       await ArchiveTickets.create({
         ticketID,
         data: compressedData,
@@ -21,7 +27,8 @@ async function handleCreateZSTDTicket(req, res) {
         originalSize: originalSize,
         compressedSize: compressedSize,
         compressionRatio:compressionRatio,
-        compressionTime: compressionTime
+        compressionTime: compressionTime,
+        decompressionTime: decompressionTime
       });
   
       return res.status(201).json({ msg: "success" });
