@@ -60,7 +60,7 @@ async function lzmaDecompression(ticket) {
         const decompressedData = JSON.parse(result.toString());
         resolve([decompressedData, decompressionTime]);
     });
-});
+  });
 }
 
 async function handleGetLZMATicketById(req, res) {

@@ -67,6 +67,9 @@ async function handleGetAlgoCountTimeRatio(req, res){
             }
         ]
 
+        console.log(algorithmsData);
+
+        // Sort algorithms primarily by avgCompressionTime (ascending) and secondarily by avgCompressionRatio (descending)
         algorithmsData.sort((a, b) => {
             if (a.avgCompressionTime === b.avgCompressionTime) {
                 return b.avgCompressionRatio - a.avgCompressionRatio;
@@ -78,7 +81,7 @@ async function handleGetAlgoCountTimeRatio(req, res){
         algorithmsData[1].rating = 'Average';
         algorithmsData[2].rating = 'Worst';
         
-        res.status(200).json([
+        /* res.status(200).json([
             {
                 id: 1,
                 name: "ZSTD",
@@ -106,7 +109,12 @@ async function handleGetAlgoCountTimeRatio(req, res){
                 avgCompressionTime: round(algorithmsData[2].avgCompressionTime),
                 avgCompressionRatio: round(algorithmsData[2].avgCompressionRatio)
             }
-        ]);
+        ]); */
+        res.status(200).json({
+            LZMA: algorithmsData.find(algo => algo.name === 'LZMA'),
+            Zstandard: algorithmsData.find(algo => algo.name === 'ZSTD'),
+            Brotli: algorithmsData.find(algo => algo.name === 'Brotli')
+        });
     }catch(error){
         console.log(error);
         res.status(500).json({ msg: 'Error getting compression counts', error });
