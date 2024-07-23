@@ -18,6 +18,18 @@ async function handleCreateLZMATicket(req, res) {
       const compressedSize = compressedData.length;
       const compressionRatio = originalSize / compressedSize;
       
+      // Decompress the data to measure decompression time
+      const startDecompress = process.hrtime();
+      lzma.decompress(compressedData, (result, error) => {
+        if (error) {
+          return res.status(500).json({ msg: "error decompressing data", error });
+        }
+        const decompressedData = JSON.parse(result.toString());
+        //res.status(200).json(decompressedData);
+      });
+      const endDecompress = process.hrtime(startDecompress);
+      const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+
 
       await ArchiveTickets.create({
         ticketID,
@@ -26,7 +38,8 @@ async function handleCreateLZMATicket(req, res) {
         originalSize: originalSize,
         compressedSize: compressedSize,
         compressionRatio: compressionRatio,
-        compressionTime: compressionTime
+        compressionTime: compressionTime,
+        decompressionTime: decompressionTime
       });
       return res.status(201).json({ msg: "success" });
     });
