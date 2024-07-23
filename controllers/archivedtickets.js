@@ -98,10 +98,15 @@ async function recompressArchived() {
             if(accessPerWeek < 2) {
                 if(ticket.compressor !== 'LZMA') {
                     const [decompressedData, ] = await decompressData(ticket);
-                    ticket.data = await lzmaCompress(decompressedData);
+                    const [compressedData, compressionTime, compressionRatio] = await lzmaCompress(decompressedData);
+                    ticket.data = compressedData;
+                    ticket.compressionTime = compressionTime;
+                    ticket.compressionRatio = compressionRatio;
+                    ticket.compressedSize = ticket.originalSize / compressionRatio;
                     ticket.compressor = 'LZMA';
+                    const [, decompressionTime] = await decompressData(ticket);
+                    ticket.decompressionTime = decompressionTime;
                     recompress = true;
-
                 }
             }
 
@@ -109,8 +114,14 @@ async function recompressArchived() {
             else if(accessPerWeek < 10) {
                 if(ticket.compressor !== 'Brotli') {
                     const [decompressedData, ] = await decompressData(ticket);
-                    ticket.data = await brotliCompress(decompressedData);
+                    const [compressedData, compressionTime, compressionRatio] = await brotliCompress(decompressedData);
+                    ticket.data = compressedData;
+                    ticket.compressionTime = compressionTime;
+                    ticket.compressionRatio = compressionRatio;
+                    ticket.compressedSize = ticket.originalSize / compressionRatio;
                     ticket.compressor = 'Brotli';
+                    const [, decompressionTime] = await decompressData(ticket);
+                    ticket.decompressionTime = decompressionTime;
                     recompress = true;
                 }
             }
@@ -118,10 +129,15 @@ async function recompressArchived() {
             // low CR High speed - ZSTD
             else if(ticket.compressor !== 'ZSTD') {
                 const [decompressedData, ] = await decompressData(ticket);
-                ticket.data = await zstdCompress(decompressedData);
+                const [compressedData, compressionTime, compressionRatio] = await zstdCompress(decompressedData);
+                ticket.data = compressedData;
+                ticket.compressionTime = compressionTime;
+                ticket.compressionRatio = compressionRatio;
+                ticket.compressedSize = ticket.originalSize / compressionRatio;
                 ticket.compressor = 'ZSTD';
+                const [, decompressionTime] = await decompressData(ticket);
+                ticket.decompressionTime = decompressionTime;
                 recompress = true;
-
             }
 
             if(recompress){

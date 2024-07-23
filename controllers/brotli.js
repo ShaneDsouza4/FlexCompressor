@@ -36,8 +36,15 @@ async function handleCreateBrotliTicket(req, res){
 }
 
 function brotliCompress(data) {
+    const originalData = JSON.stringify(data);
+    const originalSize = Buffer.byteLength(originalData);
+    const startCompress = process.hrtime();
     const compressedData = Buffer.from(brotli.compress(Buffer.from(JSON.stringify(data))));
-    return compressedData;
+    const endCompress = process.hrtime(startCompress);
+    const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
+    const compressedSize = compressedData.length;
+    const compressionRatio = originalSize / compressedSize;
+    return [compressedData, compressionTime, compressionRatio];
 }
 
 function brotliDecompression(ticket) {

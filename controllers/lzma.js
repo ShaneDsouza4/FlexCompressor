@@ -50,12 +50,20 @@ async function handleCreateLZMATicket(req, res) {
 
 async function lzmaCompress(data) {
   return new Promise((resolve, reject) => {
+    const startCompress = process.hrtime();
     lzma.compress(JSON.stringify(data), 1, (result, error) => {
       if (error) {
         return reject(null);
       }
+      const endCompress = process.hrtime(startCompress);
+      const originalData = JSON.stringify(data);
+      const originalSize = Buffer.byteLength(originalData);
       const compressedData = Buffer.from(result);
-      resolve(compressedData);
+      const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
+
+      const compressedSize = compressedData.length;
+      const compressionRatio = originalSize / compressedSize;
+      resolve([compressedData, compressionTime, compressionRatio]);
     });
   });
 }
