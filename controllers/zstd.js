@@ -1,3 +1,4 @@
+const ActiveTickets = require("../models/ActiveTickets");
 const ArchiveTickets = require("../models/archiveTickets.js");
 const zstd = require('@mongodb-js/zstd');
 const {compress, decompress} = require("@mongodb-js/zstd");
@@ -30,9 +31,17 @@ async function handleCreateZSTDTicket(req, res) {
         compressionTime: compressionTime,
         decompressionTime: decompressionTime
       });
+
+      // Check if the ticket exists in ActiveTickets
+      const activeTicket = await ActiveTickets.findOne({ ticketID });
+      if (activeTicket) {
+          // Delete the ticket from ActiveTickets
+          await ActiveTickets.deleteOne({ ticketID });
+      }
   
       return res.status(201).json({ msg: "success" });
     } catch (error) {
+      //console.log(error);
       return res.status(500).json({ msg: "error creating ZSTD ticket", error });
     }
   }
