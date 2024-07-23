@@ -117,14 +117,15 @@ async function archiveTickets(req, res) {
 
 async function handleGetTicketByID(req, res){
     try{
-        const ticket = await ActiveTickets.findById(req.params.id);
+        const ticket = await ActiveTickets.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { accessCount: 1 } },
+            { new: true } // Return the updated document
+        );
+
         if(!ticket){
             return res.status(404).json({msg:"No ticket found!"});
         }
-
-        // Increment the access count
-        ticket.accessCount += 1;
-        await ticket.save();
 
         return res.status(200).json({msg:"success", ticket});
     }catch(error){

@@ -12,7 +12,8 @@ async function handleGetAlgoCountTimeRatio(req, res){
                     _id: null,
                     count: { $sum: 1 },
                     avgCompressionTime: { $avg: "$compressionTime" },
-                    avgCompressionRatio: { $avg: "$compressionRatio" }
+                    avgCompressionRatio: { $avg: "$compressionRatio" },
+                    avgDecompressionTime: { $avg: "$decompressionTime" },
                 }
             }
         ]);
@@ -24,7 +25,8 @@ async function handleGetAlgoCountTimeRatio(req, res){
                     _id: null,
                     count: { $sum: 1 },
                     avgCompressionTime: { $avg: "$compressionTime" },
-                    avgCompressionRatio: { $avg: "$compressionRatio" }
+                    avgCompressionRatio: { $avg: "$compressionRatio" },
+                    avgDecompressionTime: { $avg: "$decompressionTime" },
                 }
             }
         ]);
@@ -36,7 +38,8 @@ async function handleGetAlgoCountTimeRatio(req, res){
                     _id: null,
                     count: { $sum: 1 },
                     avgCompressionTime: { $avg: "$compressionTime" },
-                    avgCompressionRatio: { $avg: "$compressionRatio" }
+                    avgCompressionRatio: { $avg: "$compressionRatio" },
+                    avgDecompressionTime: { $avg: "$decompressionTime" },
                 }
             }
         ]);
@@ -48,71 +51,45 @@ async function handleGetAlgoCountTimeRatio(req, res){
                 name: "ZSTD",
                 totalTickets:allTicketCount,
                 tasksCompleted: zstdAggregation[0].count,
-                avgCompressionTime: zstdAggregation[0].avgCompressionTime,
-                avgCompressionRatio: zstdAggregation[0].avgCompressionRatio
+                avgCompressionTime: round(zstdAggregation[0].avgCompressionTime),
+                avgCompressionRatio: round(zstdAggregation[0].avgCompressionRatio),
+                avgDecompressionTime: round(zstdAggregation[0].avgDecompressionTime),
             },
             {
                 name: "LZMA",
                 totalTickets:allTicketCount,
                 tasksCompleted: lzmaAggregation[0].count,
-                avgCompressionTime: lzmaAggregation[0].avgCompressionTime,
-                avgCompressionRatio: lzmaAggregation[0].avgCompressionRatio
+                avgCompressionTime: round(lzmaAggregation[0].avgCompressionTime),
+                avgCompressionRatio: round(lzmaAggregation[0].avgCompressionRatio),
+                avgDecompressionTime: round(lzmaAggregation[0].avgDecompressionTime),
             },
             {
                 name: "Brotli",
                 totalTickets:allTicketCount,
                 tasksCompleted: brotliAggregation[0].count,
-                avgCompressionTime: brotliAggregation[0].avgCompressionTime,
-                avgCompressionRatio: brotliAggregation[0].avgCompressionRatio
+                avgCompressionTime: round(brotliAggregation[0].avgCompressionTime),
+                avgCompressionRatio: round(brotliAggregation[0].avgCompressionRatio),
+                avgDecompressionTime: round(brotliAggregation[0].avgDecompressionTime),
             }
         ]
 
-        console.log(algorithmsData);
+        //console.log(algorithmsData);
 
-        // Sort algorithms primarily by avgCompressionTime (ascending) and secondarily by avgCompressionRatio (descending)
+        // Sort by avgDecompressionTime (ascending) and then by avgCompressionRatio (descending)
         algorithmsData.sort((a, b) => {
-            if (a.avgCompressionTime === b.avgCompressionTime) {
+            if (a.avgDecompressionTime === b.avgDecompressionTime) {
                 return b.avgCompressionRatio - a.avgCompressionRatio;
             }
-            return a.avgCompressionTime - b.avgCompressionTime;
+            return a.avgDecompressionTime - b.avgDecompressionTime;
         });
 
         algorithmsData[0].rating = 'Best';
         algorithmsData[1].rating = 'Average';
         algorithmsData[2].rating = 'Worst';
         
-        /* res.status(200).json([
-            {
-                id: 1,
-                name: "ZSTD",
-                position: algorithmsData[0].rating,
-                totalTickets:allTicketCount,
-                tasksCompleted: algorithmsData[0].tasksCompleted,
-                avgCompressionTime: round(algorithmsData[0].avgCompressionTime),
-                avgCompressionRatio: round(algorithmsData[0].avgCompressionRatio)
-            },
-            {
-                id: 2,
-                name: "LZMA",
-                position: algorithmsData[1].rating,
-                totalTickets:allTicketCount,
-                tasksCompleted: algorithmsData[1].tasksCompleted,
-                avgCompressionTime: round(algorithmsData[1].avgCompressionTime),
-                avgCompressionRatio: round(algorithmsData[1].avgCompressionRatio)
-            },
-            {
-                id: 3,
-                name: "Brotli",
-                position: algorithmsData[2].rating,
-                totalTickets:allTicketCount,
-                tasksCompleted: algorithmsData[2].tasksCompleted,
-                avgCompressionTime: round(algorithmsData[2].avgCompressionTime),
-                avgCompressionRatio: round(algorithmsData[2].avgCompressionRatio)
-            }
-        ]); */
         res.status(200).json({
             LZMA: algorithmsData.find(algo => algo.name === 'LZMA'),
-            Zstandard: algorithmsData.find(algo => algo.name === 'ZSTD'),
+            ZSTD: algorithmsData.find(algo => algo.name === 'ZSTD'),
             Brotli: algorithmsData.find(algo => algo.name === 'Brotli')
         });
     }catch(error){
