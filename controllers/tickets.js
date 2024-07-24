@@ -278,34 +278,35 @@ async function decompressData(data, algorithm) {
 
 async function handleGetAllArchivedTickets(req, res) {
     try {
-        const tickets = await ArchiveTickets.find({});
-        const decompressedTickets = await Promise.all(tickets.map(async (ticket) => {
-            const startDecompress = process.hrtime();
-            let decompressedDataString;
+        const tickets = await ArchiveTickets.find({}, { data: 0 });
+        // const decompressedTickets = await Promise.all(tickets.map(async (ticket) => {
+        //     const startDecompress = process.hrtime();
+        //     let decompressedDataString;
 
-            try {
-                decompressedDataString = await decompressData(ticket.data, ticket.compressor); // Use ticket.data directly
-            } catch (error) {
-                console.error(`Error decompressing ticket with ID ${ticket._id}:`, error);
-                return {
-                    ...ticket._doc,
-                    error: `Error decompressing ticket: ${error.message}`
-                };
-            }
+        //     try {
+        //         decompressedDataString = await decompressData(ticket.data, ticket.compressor); // Use ticket.data directly
+        //     } catch (error) {
+        //         console.error(`Error decompressing ticket with ID ${ticket._id}:`, error);
+        //         return {
+        //             ...ticket._doc,
+        //             error: `Error decompressing ticket: ${error.message}`
+        //         };
+        //     }
 
-            const endDecompress = process.hrtime(startDecompress);
-            const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+        //     const endDecompress = process.hrtime(startDecompress);
+        //     const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
 
-            await ArchiveTickets.findByIdAndUpdate(ticket._id, { decompressionTime });
+        //     await ArchiveTickets.findByIdAndUpdate(ticket._id, { decompressionTime });
 
-            return {
-                ...ticket._doc,
-                data: JSON.parse(decompressedDataString),
-                decompressionTime
-            };
-        }));
+        //     return {
+        //         ...ticket._doc,
+        //         data: JSON.parse(decompressedDataString),
+        //         decompressionTime
+        //     };
+        // }));
 
-        return res.status(200).json({ msg: "Success", tickets: decompressedTickets });
+        //return res.status(200).json({ msg: "Success", tickets: decompressedTickets });
+        return res.status(200).json({ msg: "Success", tickets: tickets });
     } catch (error) {
         console.error('Error getting archived tickets:', error);
         return res.status(500).json({ msg: "Error Getting Archived Tickets.", error });
