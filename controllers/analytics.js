@@ -137,8 +137,46 @@ async function getCompressionStats(req, res){
     }
 }
 
+async function handleMonthlyCompressionStats(req, res){
+    try {
+        const stats = await archiveTickets.aggregate([
+            {
+                $project: {
+                    yearMonth: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+                    compressionRatio: 1,
+                    compressionTime: 1,
+                    decompressionTime: 1
+                }
+            },
+            {
+                $group: {
+                    _id: "$yearMonth",
+                    avgCompressionRatio: { $avg: "$compressionRatio" },
+                    avgCompressionTime: { $avg: "$compressionTime" },
+                    avgDecompressionTime: { $avg: "$decompressionTime" }
+                }
+            },
+            {
+                $sort: { _id: 1 }
+            }
+        ]);
+
+        const roundedStats = stats.map(stat => ({
+            _id: stat._id,
+            avgCompressionRatio: Math.round(stat.avgCompressionRatio * 100) / 100,
+            avgCompressionTime: Math.round(stat.avgCompressionTime * 100) / 100,
+            avgDecompressionTime: Math.round(stat.avgDecompressionTime * 100) / 100
+        }));
+
+        res.status(200).json({ msg: "success", monthlyStats:roundedStats });
+    } catch (error) {
+        res.status(500).json({ msg: "Error getting compression stats", error });
+    }
+}
+
 module.exports = {
     handleGetAlgoCountTimeRatio,
     handleGetBothCollectionCount,
-    getCompressionStats
+    getCompressionStats,
+    handleMonthlyCompressionStats
 }
