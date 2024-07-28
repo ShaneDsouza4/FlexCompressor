@@ -68,7 +68,6 @@ async function getArchivedTicketById(req, res) {
     }
 }
 
-// to calculate number of accesses per week
 function calculateAccessesPerWeek(createdDate, totalAccesses = 0) {
     const createdDateParsed = new Date(createdDate);
     const now = new Date();
@@ -76,7 +75,7 @@ function calculateAccessesPerWeek(createdDate, totalAccesses = 0) {
 
 
     if (weeksSinceCreation < 1) {
-        return totalAccesses; // or return 0 based on your requirements
+        return totalAccesses; 
     }
 
     const accessesPerWeek = totalAccesses / weeksSinceCreation;

@@ -1,6 +1,6 @@
 const express = require("express");
 
-//Simple Tickets
+//Simple Tickets Controller
 const { 
     handleCreateTicket,
     handleGetAllTickets,
@@ -9,6 +9,7 @@ const {
     archiveTickets
 } = require("../controllers/tickets");
 
+//Archived Tickets Controller
 const {
     getArchivedTicketByTicketId,
     getArchivedTicketById
@@ -25,13 +26,15 @@ const {
 //LZMA Controller
 const { 
     handleCreateLZMATicket,
-    handleGetLZMATicketById
+    handleGetLZMATicketById,
+    handleCreateBulkLZMATickets
 } = require("../controllers/lzma");
 
 //ZSTD Controller
 const { 
     handleCreateZSTDTicket,
-    handleGetZSTDTicketById
+    handleGetZSTDTicketById,
+    handleCreateBulkZSTDTickets
 } = require("../controllers/zstd");
 
 const router = express.Router();
@@ -45,7 +48,6 @@ router.post("/archiveTickets", archiveTickets);
 //General archive Tickets Routes
 router.get("/getArchivedTicket/ticketid/:id", getArchivedTicketByTicketId);
 router.get("/getArchivedTicket/:id", getArchivedTicketById);
-
 router.get("/getAllArchivedTickets", handleGetAllArchivedTickets)
 
 //Brotli Routes
@@ -56,12 +58,11 @@ router.post('/createBulkBrotliTickets', handleCreateBulkBrotliTicket);
 //LZMA Routes
 router.post("/createLZMATicket", handleCreateLZMATicket);
 router.get("/getLZMA/:id", handleGetLZMATicketById);
+router.post('/createBulkLZMATickets', handleCreateBulkLZMATickets);
 
 //ZTD Routes
 router.post("/createZSTDTicket", handleCreateZSTDTicket);
 router.get("/getZSTD/:id", handleGetZSTDTicketById);
-// router.post("/createactive", )
-
-
+router.post('/createBulkZSTDTickets', handleCreateBulkZSTDTickets);
 
 module.exports = router;

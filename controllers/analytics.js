@@ -126,7 +126,7 @@ async function getCompressionStats(req, res){
         res.status(200).json({
             totalOriginalSize,
             totalCompressedSize,
-            percentageSaved: Math.round(percentageSaved * 100) / 100 // Round to 2 decimal places
+            percentageSaved: Math.round(percentageSaved * 100) / 100 //2 decimal places
         });
     } else {
         res.status(200).json({

@@ -4,8 +4,6 @@ const ArchiveTickets = require("../models/archiveTickets");
 const brotli = require("brotli");
 const lzma = require("lzma");
 const zstd = require('@mongodb-js/zstd');
-
-
 const { ObjectId } = mongoose.Types;
 
 async function handleCreateTicket(req, res){
@@ -26,11 +24,10 @@ async function handleCreateTicket(req, res){
     }
 }
 
-// archive tickets older than a month
 async function archiveOldTickets() {
     try {
 
-      // Calculate the date one month ago
+      //Calculating date of one month
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
       
@@ -46,7 +43,7 @@ async function archiveOldTickets() {
       const startCompress = process.hrtime();
       const compressedData = await zstd.compress(Buffer.from(originalData));
       const endCompress = process.hrtime(startCompress);
-      const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
+      const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Milliseconds
       const compressedSize = compressedData.length;
       const compressionRatio = originalSize / compressedSize;
 
@@ -91,7 +88,7 @@ async function archiveTickets(req, res) {
       const startCompress = process.hrtime();
       const compressedData = await zstd.compress(Buffer.from(originalData));
       const endCompress = process.hrtime(startCompress);
-      const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Convert to milliseconds
+      const compressionTime = endCompress[0] * 1000 + endCompress[1] / 1000000; // Milliseconds
       const compressedSize = compressedData.length;
       const compressionRatio = originalSize / compressedSize;
 
@@ -120,7 +117,7 @@ async function handleGetTicketByID(req, res){
         const ticket = await ActiveTickets.findByIdAndUpdate(
             req.params.id,
             { $inc: { accessCount: 1 } },
-            { new: true } // Return the updated document
+            { new: true } // Returning updated document
         );
 
         if(!ticket){
@@ -159,7 +156,7 @@ async function handleGetAllCompressedBrotliTickets(req, res) {
             }
 
             const endDecompress = process.hrtime(startDecompress);
-            const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+            const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Milliseconds
 
             await ArchiveTickets.findByIdAndUpdate(ticket._id, { decompressionTime });
 
@@ -198,7 +195,7 @@ async function handleGetAllCompressedLZMATickets(req, res) {
             }
 
             const endDecompress = process.hrtime(startDecompress);
-            const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+            const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Milliseconds
 
             await ArchiveTickets.findByIdAndUpdate(ticket._id, { decompressionTime });
 
@@ -232,7 +229,7 @@ async function handleGetAllCompressedZSTDTickets(req, res) {
             }
 
             const endDecompress = process.hrtime(startDecompress);
-            const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
+            const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Milliseconds
 
             await ArchiveTickets.findByIdAndUpdate(ticket._id, { decompressionTime });
 
@@ -250,62 +247,9 @@ async function handleGetAllCompressedZSTDTickets(req, res) {
     }
 }
 
-async function decompressData(data, algorithm) {
-    try {
-        const bufferData = Buffer.from(data); // Ensure data is a Buffer
-
-        switch (algorithm) {
-            case 'Brotli':
-                return Buffer.from(brotli.decompress(bufferData)).toString();
-            case 'ZSTD':
-                const decompressedZstd = await zstd.decompress(bufferData);
-                return Buffer.from(decompressedZstd).toString();
-            case 'LZMA':
-                return await new Promise((resolve, reject) => {
-                    lzma.decompress(bufferData, (result, error) => {
-                        if (error) reject(error);
-                        else resolve(Buffer.from(result).toString());
-                    });
-                });
-            default:
-                throw new Error('Unsupported compression algorithm');
-        }
-    } catch (error) {
-        console.error('Error decompressing data:', error);
-        throw error;
-    }
-}
-
 async function handleGetAllArchivedTickets(req, res) {
     try {
         const tickets = await ArchiveTickets.find({}, { data: 0 });
-        // const decompressedTickets = await Promise.all(tickets.map(async (ticket) => {
-        //     const startDecompress = process.hrtime();
-        //     let decompressedDataString;
-
-        //     try {
-        //         decompressedDataString = await decompressData(ticket.data, ticket.compressor); // Use ticket.data directly
-        //     } catch (error) {
-        //         console.error(`Error decompressing ticket with ID ${ticket._id}:`, error);
-        //         return {
-        //             ...ticket._doc,
-        //             error: `Error decompressing ticket: ${error.message}`
-        //         };
-        //     }
-
-        //     const endDecompress = process.hrtime(startDecompress);
-        //     const decompressionTime = endDecompress[0] * 1000 + endDecompress[1] / 1000000; // Convert to milliseconds
-
-        //     await ArchiveTickets.findByIdAndUpdate(ticket._id, { decompressionTime });
-
-        //     return {
-        //         ...ticket._doc,
-        //         data: JSON.parse(decompressedDataString),
-        //         decompressionTime
-        //     };
-        // }));
-
-        //return res.status(200).json({ msg: "Success", tickets: decompressedTickets });
         return res.status(200).json({ msg: "Success", tickets: tickets });
     } catch (error) {
         console.error('Error getting archived tickets:', error);

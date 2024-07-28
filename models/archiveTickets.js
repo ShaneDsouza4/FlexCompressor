@@ -25,10 +25,10 @@ const ticketSchema = new mongoose.Schema({
         required: true
     },
     compressionTime: {
-        type: Number, // in milliseconds
+        type: Number, 
     },
     decompressionTime: {
-        type: Number, // in milliseconds
+        type: Number, 
     },
     accessCount: {
         type: Number,
@@ -44,6 +44,7 @@ const ticketSchema = new mongoose.Schema({
     }
 });
 
+// Updating the updatedAt field
 ticketSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();
