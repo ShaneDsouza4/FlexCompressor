@@ -94,7 +94,7 @@ async function recompressArchived() {
             let recompress = false;
 
             // high CR low Speed - LZMA
-            if(accessPerWeek < 2) {
+            if(accessPerWeek < 1) {
                 if(ticket.compressor !== 'LZMA') {
                     const [decompressedData, ] = await decompressData(ticket);
                     const [compressedData, compressionTime, compressionRatio] = await lzmaCompress(decompressedData);
