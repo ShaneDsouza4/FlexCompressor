@@ -49,27 +49,27 @@ async function handleGetAlgoCountTimeRatio(req, res){
         const algorithmsData = [
             {
                 name: "ZSTD",
-                totalTickets:allTicketCount,
-                tasksCompleted: zstdAggregation[0].count,
-                avgCompressionTime: round(zstdAggregation[0].avgCompressionTime),
-                avgCompressionRatio: round(zstdAggregation[0].avgCompressionRatio),
-                avgDecompressionTime: round(zstdAggregation[0].avgDecompressionTime),
+                totalTickets: allTicketCount,
+                tasksCompleted: zstdAggregation.length ? zstdAggregation[0].count : 0,
+                avgCompressionTime: zstdAggregation.length ? round(zstdAggregation[0].avgCompressionTime) : 0,
+                avgCompressionRatio: zstdAggregation.length ? round(zstdAggregation[0].avgCompressionRatio) : 0,
+                avgDecompressionTime: zstdAggregation.length ? round(zstdAggregation[0].avgDecompressionTime) : 0,
             },
             {
                 name: "LZMA",
-                totalTickets:allTicketCount,
-                tasksCompleted: lzmaAggregation[0].count,
-                avgCompressionTime: round(lzmaAggregation[0].avgCompressionTime),
-                avgCompressionRatio: round(lzmaAggregation[0].avgCompressionRatio),
-                avgDecompressionTime: round(lzmaAggregation[0].avgDecompressionTime),
+                totalTickets: allTicketCount,
+                tasksCompleted: lzmaAggregation.length ? lzmaAggregation[0].count : 0,
+                avgCompressionTime: lzmaAggregation.length ? round(lzmaAggregation[0].avgCompressionTime) : 0,
+                avgCompressionRatio: lzmaAggregation.length ? round(lzmaAggregation[0].avgCompressionRatio) : 0,
+                avgDecompressionTime: lzmaAggregation.length ? round(lzmaAggregation[0].avgDecompressionTime) : 0,
             },
             {
                 name: "Brotli",
-                totalTickets:allTicketCount,
-                tasksCompleted: brotliAggregation[0].count,
-                avgCompressionTime: round(brotliAggregation[0].avgCompressionTime),
-                avgCompressionRatio: round(brotliAggregation[0].avgCompressionRatio),
-                avgDecompressionTime: round(brotliAggregation[0].avgDecompressionTime),
+                totalTickets: allTicketCount,
+                tasksCompleted: brotliAggregation.length ? brotliAggregation[0].count : 0,
+                avgCompressionTime: brotliAggregation.length ? round(brotliAggregation[0].avgCompressionTime) : 0,
+                avgCompressionRatio: brotliAggregation.length ? round(brotliAggregation[0].avgCompressionRatio) : 0,
+                avgDecompressionTime: brotliAggregation.length ? round(brotliAggregation[0].avgDecompressionTime) : 0,
             }
         ]
 
