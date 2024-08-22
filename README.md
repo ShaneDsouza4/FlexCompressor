@@ -27,3 +27,8 @@ The **FlexCompressor** is designed to enhance storage efficiency and optimize da
 The frontend interface for this system is available at [here](https://github.com/tusharkaran/ADT_frontend). It provides an intuitive user experience for managing tickets and interacting with the compression system.
 
 ## Screenshots
+![Dashboard](https://github.com/user-attachments/assets/989af96d-a32a-4aee-9592-6917be6c267f)
+
+![Active Tickets](https://github.com/user-attachments/assets/f680a97c-0fc1-4369-afe8-69e2868874e9)
+
+![Archived Tickets](https://github.com/user-attachments/assets/d72d7a2c-234d-4d3c-a6c6-d70d0d9b785a)
