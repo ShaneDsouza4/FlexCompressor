@@ -13,6 +13,7 @@ The **FlexCompressor** is designed to enhance storage efficiency and optimize da
 
 ## Technologies Used
 
+- **React**: For providing a seamless and dynamic user interface for interacting with the backend services.
 - **Node.js**: For the server-side logic and API development.
 - **Express.js**: As the web framework for building RESTful APIs.
 - **MongoDB**: A NoSQL database used to store and manage ticket data efficiently.
